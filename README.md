@@ -223,12 +223,12 @@ it offline against repo-qa itself with the mock embedder:
 
 | Scope | hit-rate@5 | MRR@5 | Floor enforced |
 |---|---|---|---|
-| Source only (`-x "evals/*" -x "tests/*"`) | 0.955 | 0.667 | 0.90 / 0.60 |
-| Everything (`-x "evals/*"`) | 0.773 | 0.538 | 0.70 / 0.45 |
+| Source code only (`-x "evals/*" -x "tests/*" -x "*.md"`) | 1.000 | 0.720 | 0.90 / 0.60 |
+| Everything (`-x "evals/*"`) | 0.773 | 0.513 | 0.70 / 0.45 |
 
-Test files restate the identifiers of the code they test, so with a purely lexical embedder
-they are the main competitors for source chunks. Use `--exclude` to scope questions away from
-them. These are mock-embedder numbers; run the same command with `fastembed` to measure
+Test files restate the identifiers of the code they test, and the README and CHANGELOG
+describe each component in prose, so with a purely lexical embedder they are the main
+competitors for source chunks. Use `--exclude` to scope questions to code. These are mock-embedder numbers; run the same command with `fastembed` to measure
 the real model.
 
 ## Development

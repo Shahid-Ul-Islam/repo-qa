@@ -100,12 +100,14 @@ def self_index(tmp_path_factory):
 @pytest.mark.parametrize(
     ("exclude", "min_hit_rate", "min_mrr"),
     [
-        # Primary gate: questions are about source code. Test files restate the identifiers
-        # of the code they test, which the lexical mock embedder cannot tell apart.
-        # Baseline when set: hit-rate@5 0.955, MRR@5 0.667.
-        (["evals/*", "tests/*"], 0.90, 0.60),
+        # Primary gate: questions are about source code, so measure retrieval over source
+        # code. Tests restate the identifiers of the code they test, and the README and
+        # CHANGELOG describe every component in prose; the lexical mock embedder cannot
+        # tell either apart from the code itself.
+        # Baseline at v0.1.0: hit-rate@5 1.000, MRR@5 0.720.
+        (["evals/*", "tests/*", "*.md"], 0.90, 0.60),
         # Sanity floor over everything indexed (tests and docs compete for ranks).
-        # Baseline when set: hit-rate@5 0.773, MRR@5 0.538.
+        # Baseline at v0.1.0: hit-rate@5 0.773, MRR@5 0.513.
         (["evals/*"], 0.70, 0.45),
     ],
     ids=["source", "everything"],
