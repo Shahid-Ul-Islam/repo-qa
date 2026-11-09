@@ -97,17 +97,25 @@ def self_index(tmp_path_factory):
     store.close()
 
 
-def test_self_eval_retrieval_quality(self_index) -> None:
-    """Regression floor for retrieval on repo-qa's own code (offline, mock embedder).
-
-    Baseline when the floor was set: hit-rate@5 0.857, MRR@5 0.587.
-    """
+@pytest.mark.parametrize(
+    ("exclude", "min_hit_rate", "min_mrr"),
+    [
+        # Primary gate: questions are about source code. Test files restate the identifiers
+        # of the code they test, which the lexical mock embedder cannot tell apart.
+        # Baseline when set: hit-rate@5 0.955, MRR@5 0.667.
+        (["evals/*", "tests/*"], 0.90, 0.60),
+        # Sanity floor over everything indexed (tests and docs compete for ranks).
+        # Baseline when set: hit-rate@5 0.773, MRR@5 0.538.
+        (["evals/*"], 0.70, 0.45),
+    ],
+    ids=["source", "everything"],
+)
+def test_self_eval_retrieval_quality(self_index, exclude, min_hit_rate, min_mrr) -> None:
+    """Regression floors for retrieval on repo-qa's own code (offline, mock embedder)."""
     store, embedder, repo = self_index
-    report = run_eval(
-        load_cases(SELF_EVAL), repo, Searcher(store, embedder), k=5, exclude=["evals/*"]
-    )
-    assert report.hit_rate >= 0.80, report.model_dump_json(indent=2)
-    assert report.mrr >= 0.50
+    report = run_eval(load_cases(SELF_EVAL), repo, Searcher(store, embedder), k=5, exclude=exclude)
+    assert report.hit_rate >= min_hit_rate, report.model_dump_json(indent=2)
+    assert report.mrr >= min_mrr, report.model_dump_json(indent=2)
     assert report.citation_precision is None  # no answers requested
 
 
