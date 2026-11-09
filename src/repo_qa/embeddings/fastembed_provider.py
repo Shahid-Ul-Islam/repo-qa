@@ -9,13 +9,20 @@ import numpy as np
 
 from repo_qa.embeddings.base import normalize_rows
 
+# Avoids importing fastembed (slow) just to learn the dimension of common models.
+KNOWN_DIMS = {
+    "BAAI/bge-small-en-v1.5": 384,
+    "BAAI/bge-base-en-v1.5": 768,
+    "sentence-transformers/all-MiniLM-L6-v2": 384,
+}
+
 
 class FastEmbedProvider:
     def __init__(self, model_name: str = "BAAI/bge-small-en-v1.5", batch_size: int = 64) -> None:
         self.name = model_name
         self.batch_size = batch_size
         self._model: Any = None
-        self._dim: int | None = None
+        self._dim: int | None = KNOWN_DIMS.get(model_name)
 
     def _load(self) -> Any:
         if self._model is None:
