@@ -1,0 +1,7 @@
+<div class="card">
+  <div><code>{{ path }}:{{ start }}-{{ end }}</code>
+    {% for s in symbols %}<span class="muted"> · {{ s }}</span>{% endfor %}
+    <a href="#" class="muted" style="float:right" onclick="this.closest('#viewer').innerHTML=''; return false">close</a>
+  </div>
+  <pre class="lang-{{ language }}">{% for n, line, hl in rows %}<span class="row{% if hl %} hl{% endif %}"><span class="ln">{{ n }}</span>{{ line }}</span>{% endfor %}</pre>
+</div>

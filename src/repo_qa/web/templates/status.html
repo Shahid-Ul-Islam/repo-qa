@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Index status · repo-qa{% endblock %}
+{% block nav_status %}active{% endblock %}
+{% block meta %}{{ db_path }}{% endblock %}
+{% block content %}
+<div class="card">
+  <p class="muted" style="margin-top:0">Embedder <code>{{ embedder }}</code> · answers by <code>{{ provider }}</code></p>
+  {% if not statuses %}
+    <p>No repositories are indexed yet. Run <code>repo-qa index /path/to/repo</code>.</p>
+  {% else %}
+  <table>
+    <thead>
+      <tr><th>Repository</th><th>Files</th><th>Chunks</th><th>Embedded</th><th>Model</th>
+          <th>HEAD</th><th>Indexed</th><th>Languages</th></tr>
+    </thead>
+    <tbody>
+    {% for s in statuses %}
+      <tr>
+        <td><a href="/?repo={{ s.repo.id }}">{{ s.repo.name }}</a><br>
+            <span class="muted" style="font-size:12px">{{ s.repo.root_path }}</span></td>
+        <td>{{ s.file_count }}</td>
+        <td>{{ s.chunk_count }}</td>
+        <td>{{ s.embedding_count }}{% if s.embedding_count < s.chunk_count %}
+            <span class="muted">(dedup)</span>{% endif %}</td>
+        <td><code>{{ s.repo.embed_model or "–" }}</code>
+            {% if s.repo.embed_model and s.repo.embed_model != embedder %}
+            <br><span style="color:var(--warn);font-size:12px">differs from configured embedder — re-index</span>
+            {% endif %}</td>
+        <td><code>{{ (s.repo.head_commit or "–")[:10] }}</code></td>
+        <td>{{ s.repo.indexed_at.strftime("%Y-%m-%d %H:%M UTC") if s.repo.indexed_at else "–" }}</td>
+        <td style="font-size:13px">{% for lang, n in s.languages.items() %}{{ lang }} {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

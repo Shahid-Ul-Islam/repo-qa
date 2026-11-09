@@ -20,3 +20,4 @@
 {"question": "How are settings read from REPO_QA environment variables?", "expected_paths": ["src/repo_qa/config.py"], "expected_substrings": ["from_env"]}
 {"question": "How are stored embedding vectors loaded for similarity search?", "expected_paths": ["src/repo_qa/store/repository.py", "src/repo_qa/retrieval/vector.py"], "expected_substrings": ["load_vectors"]}
 {"question": "How does the CLI decide which indexed repository to use?", "expected_paths": ["src/repo_qa/runtime.py"], "expected_substrings": ["resolve_repo"]}
+{"question": "Which web route shows the highlighted lines when a citation is clicked?", "expected_paths": ["src/repo_qa/web/app.py"], "expected_substrings": ["view"]}

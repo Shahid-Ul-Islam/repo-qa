@@ -1,0 +1,44 @@
+<div class="turn card">
+  <div class="question">{{ question }}</div>
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% elif not answer.found %}
+    <div class="answer notfound">{{ answer.text }}</div>
+    <div class="muted" style="font-size:12px">{{ answer.confidence_reason }}</div>
+  {% else %}
+    <div class="answer">{{ answer_html }}</div>
+    {% if answer.citations %}
+    <ul class="citations">
+      {% for c in answer.citations %}
+      {% set url = chunk_url(repo.id, c.path, c.start_line, c.end_line) %}
+      <li><span class="badge {{ c.status.value }}">{{ c.status.value }}</span>
+        <a class="cite {{ c.status.value }}" href="{{ url }}" hx-get="{{ url }}" hx-target="#viewer">{{ c.location }}</a>
+        {% if c.reason %}<span class="muted">— {{ c.reason }}</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="muted" style="font-size:12px">No verifiable citations in this answer.</div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<input type="hidden" name="session_id" id="session_id" value="{{ session_id }}" hx-swap-oob="true">
+
+<div id="hits" hx-swap-oob="true">
+  {% if answer and answer.hits %}
+    {% for h in answer.hits %}
+    {% set url = chunk_url(repo.id, h.chunk.path, h.chunk.start_line, h.chunk.end_line) %}
+    <div class="hit" hx-get="{{ url }}" hx-target="#viewer">
+      <div><span class="loc">{{ h.chunk.location }}</span>
+        {% if h.chunk.symbol %}<code>{{ h.chunk.symbol }}</code>{% endif %}</div>
+      <div class="scores">
+        #{{ loop.index }} · rrf {{ "%.4f"|format(h.score) }}
+        · vector {% if h.vector_rank %}{{ "%.3f"|format(h.vector_score) }} (#{{ h.vector_rank }}){% else %}–{% endif %}
+        · keyword {% if h.keyword_rank %}{{ "%.2f"|format(h.keyword_score) }} (#{{ h.keyword_rank }}){% else %}–{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No chunks retrieved.</p>
+  {% endif %}
+</div>

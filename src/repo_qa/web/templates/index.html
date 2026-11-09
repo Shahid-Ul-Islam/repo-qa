@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block nav_ask %}active{% endblock %}
+{% block meta %}answers by {{ provider }}{% endblock %}
+{% block style %}
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 20px; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+  .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  select, input[type=text], textarea { background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px; }
+  textarea { width: 100%; min-height: 64px; resize: vertical; }
+  .filters { display: flex; gap: 8px; margin-top: 8px; }
+  .filters input { flex: 1; font-size: 13px; }
+  .actions { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+  button { background: var(--accent); color: var(--panel); border: 0; border-radius: 6px;
+           padding: 7px 16px; cursor: pointer; }
+  button.secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .turn { margin-bottom: 16px; }
+  .question { font-weight: 600; margin-bottom: 6px; }
+  .answer p { margin: 0 0 8px; }
+  .answer.notfound { color: var(--muted); font-style: italic; }
+  .cite { text-decoration: none; border-bottom: 1px dashed currentColor; font-family: ui-monospace,
+          Consolas, monospace; font-size: 13px; }
+  .cite.verified { color: var(--ok); }
+  .cite.ungrounded { color: var(--warn); }
+  .invalid { color: var(--bad); font-size: 12px; }
+  .citations { margin-top: 8px; font-size: 13px; }
+  .citations li { list-style: none; }
+  .badge { font-size: 11px; padding: 1px 6px; border-radius: 9px; border: 1px solid currentColor; }
+  .badge.verified { color: var(--ok); } .badge.ungrounded { color: var(--warn); }
+  .error { color: var(--bad); }
+  .side h2 { font-size: 14px; margin: 0 0 8px; color: var(--muted); }
+  .hit { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; cursor: pointer; }
+  .hit:hover .loc { text-decoration: underline; }
+  .hit .loc { color: var(--accent); font-family: ui-monospace, Consolas, monospace; }
+  .hit .scores { color: var(--muted); font-size: 12px; }
+  .viewer { margin-bottom: 20px; }
+  .viewer pre { margin: 8px 0 0; overflow-x: auto; background: var(--code-bg); border-radius: 6px;
+                padding: 8px 0; }
+  .viewer .ln { display: inline-block; width: 4em; padding-right: 12px; text-align: right;
+                color: var(--muted); user-select: none; }
+  .viewer .row { display: block; padding: 0 8px; white-space: pre; }
+  .viewer .row.hl { background: var(--hl); }
+  .htmx-indicator { display: none; } .htmx-request .htmx-indicator { display: inline; }
+{% endblock %}
+{% block content %}
+{% if not repos %}
+  <div class="card">
+    <p>No repositories are indexed yet.</p>
+    <p>Run <code>repo-qa index /path/to/repo</code>, then reload this page.</p>
+  </div>
+{% else %}
+<div class="layout">
+  <section>
+    <div class="toolbar">
+      <label>Repository
+        <select name="repo" onchange="location.href='/?repo=' + this.value">
+          {% for r in repos %}
+          <option value="{{ r.id }}" {% if r.id == selected.id %}selected{% endif %}>{{ r.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <span class="muted">{{ selected.root_path }}</span>
+      <a href="/?repo={{ selected.id }}" class="muted" style="margin-left:auto">New conversation</a>
+    </div>
+
+    <div id="conversation"></div>
+
+    <form class="card" hx-post="/ask" hx-target="#conversation" hx-swap="beforeend"
+          hx-on::after-request="if (event.detail.successful) this.question.value = ''">
+      <input type="hidden" name="repo_id" value="{{ selected.id }}">
+      <input type="hidden" name="session_id" id="session_id" value="">
+      <textarea name="question" placeholder="Ask about {{ selected.name }}… e.g. Where is authentication handled?"
+                required
+                onkeydown="if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) this.form.requestSubmit()"></textarea>
+      <div class="filters">
+        <input type="text" name="include" placeholder="only paths (globs, e.g. src/*)">
+        <input type="text" name="exclude" placeholder="skip paths (globs, e.g. tests/*)">
+      </div>
+      <div class="actions">
+        <button type="submit">Ask</button>
+        <span class="htmx-indicator muted">Thinking…</span>
+        <span class="muted" style="margin-left:auto;font-size:12px">Ctrl+Enter to send</span>
+      </div>
+    </form>
+  </section>
+
+  <aside class="side">
+    <div id="viewer" class="viewer"></div>
+    <div class="card">
+      <h2>Retrieved chunks</h2>
+      <div id="hits"><p class="muted">Ask a question to see what retrieval found.</p></div>
+    </div>
+  </aside>
+</div>
+{% endif %}
+{% endblock %}

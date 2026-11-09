@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}repo-qa{% endblock %}</title>
+  <script src="/static/htmx.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --border: #e3e2dd;
+      --accent: #2f5d8a; --ok: #2e7d4f; --warn: #a86b00; --bad: #b3261e; --hl: #fff4c2;
+      --code-bg: #f1f0ec;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161615; --panel: #1f1f1d; --text: #e8e6df; --muted: #9a988f; --border: #34332f;
+        --accent: #8db8e3; --ok: #6cc28f; --warn: #e0a640; --bad: #f07c72; --hl: #3a3420;
+        --code-bg: #262624;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+           font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    header { display: flex; align-items: center; gap: 24px; padding: 12px 20px;
+             border-bottom: 1px solid var(--border); background: var(--panel); }
+    header h1 { font-size: 17px; margin: 0; }
+    header nav a { color: var(--muted); margin-right: 16px; text-decoration: none; }
+    header nav a.active, header nav a:hover { color: var(--text); }
+    header .meta { margin-left: auto; color: var(--muted); font-size: 13px; }
+    main { padding: 20px; max-width: 1500px; margin: 0 auto; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+            padding: 16px; }
+    .muted { color: var(--muted); }
+    code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 13px; }
+    code { background: var(--code-bg); padding: 1px 4px; border-radius: 4px; }
+    a { color: var(--accent); }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border);
+             vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 13px; }
+    button, select, input, textarea { font: inherit; color: inherit; }
+    {% block style %}{% endblock %}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>repo-qa</h1>
+    <nav>
+      <a href="/" class="{% block nav_ask %}{% endblock %}">Ask</a>
+      <a href="/status" class="{% block nav_status %}{% endblock %}">Index status</a>
+    </nav>
+    <span class="meta">{% block meta %}{% endblock %}</span>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
