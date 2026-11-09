@@ -107,3 +107,9 @@ def test_search_refuses_mismatched_embedder(indexed) -> None:
     store, _, repo = indexed
     with pytest.raises(IndexMismatchError):
         Searcher(store, MockEmbedder(dim=32)).search(repo, "cart")
+
+
+def test_keyword_search_stems_words(indexed) -> None:
+    store, _, repo = indexed
+    hits = keyword_search(store, repo.id, "refunds", 5)
+    assert store.get_chunk(hits[0][0]).symbol == "refund_payment"

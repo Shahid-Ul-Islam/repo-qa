@@ -147,8 +147,10 @@ class Answer(BaseModel):
     found: bool
     citations: list[Citation] = Field(default_factory=list)
     hits: list[SearchHit] = Field(default_factory=list)
+    context: list[ContextItem] = Field(default_factory=list)
     provider: str
     session_id: str | None = None
+    confidence_reason: str | None = None
 
     @property
     def verified_citations(self) -> list[Citation]:

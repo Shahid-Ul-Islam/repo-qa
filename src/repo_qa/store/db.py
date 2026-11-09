@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS embeddings (
 CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
     text, symbol, path, terms,
     content='chunks', content_rowid='id',
-    tokenize='unicode61'
+    tokenize='porter unicode61'  -- stemming: "refunds" matches "refund"
 );
 
 CREATE TRIGGER IF NOT EXISTS chunks_ai AFTER INSERT ON chunks BEGIN
