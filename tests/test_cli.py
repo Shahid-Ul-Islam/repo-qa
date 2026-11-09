@@ -87,3 +87,22 @@ def test_embedder_mismatch_is_reported(env, sample_repo, monkeypatch) -> None:
 def test_index_rejects_missing_dir(env, tmp_path) -> None:
     out = _invoke("index", str(tmp_path / "missing"))
     assert out.exit_code == 1 and "not a directory" in out.output
+
+
+def test_serve_builds_app_and_binds_locally(env, monkeypatch) -> None:
+    import uvicorn
+
+    calls = {}
+
+    def fake_run(app_obj, **kwargs):
+        calls["app"], calls["kwargs"] = app_obj, kwargs
+
+    monkeypatch.setattr(uvicorn, "run", fake_run)
+    out = _invoke("serve", "--port", "8123")
+    assert out.exit_code == 0, out.output
+    assert calls["kwargs"]["host"] == "127.0.0.1" and calls["kwargs"]["port"] == 8123
+    assert calls["app"].title == "repo-qa"
+    assert "warning" not in out.output
+
+    exposed = _invoke("serve", "--host", "0.0.0.0")
+    assert "no authentication" in exposed.output

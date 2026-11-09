@@ -269,6 +269,31 @@ def eval_cmd(
 
 
 @app.command()
+def serve(
+    host: Annotated[str, typer.Option(help="Interface to bind (local-only by default).")] = (
+        "127.0.0.1"
+    ),
+    port: Annotated[int, typer.Option(min=1, max=65535)] = 8000,
+    db: DbOpt = None,
+    embedder: EmbedderOpt = None,
+    llm: LLMOpt = None,
+) -> None:
+    """Start the web UI."""
+    import uvicorn
+
+    from repo_qa.web.app import create_app
+
+    settings = Settings.from_env(db_path=db, embedder=embedder, llm=llm)
+    if host not in ("127.0.0.1", "localhost", "::1"):
+        console.print(
+            "[yellow]warning:[/yellow] the web UI has no authentication; anyone who can reach "
+            f"{host}:{port} can read indexed code and spend your LLM quota."
+        )
+    console.print(f"repo-qa web UI on http://{host}:{port}  (index: {settings.db_path})")
+    uvicorn.run(create_app(settings=settings), host=host, port=port, log_level="warning")
+
+
+@app.command()
 def status(repo: RepoOpt = None, db: DbOpt = None, as_json: JsonOpt = False) -> None:
     """Show indexed repositories and their index statistics."""
     rt = _runtime(db_path=db)
