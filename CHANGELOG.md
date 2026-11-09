@@ -13,3 +13,4 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - `.gitattributes` normalising line endings to LF so hashes and line numbers match across OSes.
 - Pydantic domain models (chunks, files, repos, search hits, context packs, citations, answers, eval) and `Settings` read from `REPO_QA_*` env vars.
 - SQLite store: versioned schema, FTS5 external-content table kept in sync by triggers (with split-identifier `terms` column), content-addressed embeddings, sessions/messages, and a typed `Store` repository.
+- File walker honouring `.gitignore` (via `git ls-files`, with a `pathspec` fallback for non-git dirs) that skips binaries, vendored dirs, lockfiles, minified files and oversized files; in-process git blob hashing and SHA-256 chunk content hashing.
