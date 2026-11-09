@@ -1,0 +1,22 @@
+// Self-eval: questions about repo-qa's own codebase. Run: repo-qa eval evals/repo_qa_self.jsonl
+{"question": "How are files ignored by .gitignore excluded from indexing?", "expected_paths": ["src/repo_qa/indexing/walker.py"], "expected_substrings": ["exclude-standard"]}
+{"question": "How does the indexer avoid re-embedding chunks that did not change?", "expected_paths": ["src/repo_qa/indexing/indexer.py"], "expected_substrings": ["existing_embeddings"]}
+{"question": "Where is the git blob hash of a file computed?", "expected_paths": ["src/repo_qa/indexing/hashing.py"], "expected_substrings": ["git_blob_hash"]}
+{"question": "How is source code split into functions and methods with tree-sitter?", "expected_paths": ["src/repo_qa/chunking/treesitter.py"]}
+{"question": "How are Markdown documents chunked by heading?", "expected_paths": ["src/repo_qa/chunking/lines.py"], "expected_substrings": ["markdown_chunks"]}
+{"question": "Which file extensions map to which programming languages?", "expected_paths": ["src/repo_qa/chunking/languages.py"]}
+{"question": "How are vector and keyword results combined with reciprocal rank fusion?", "expected_paths": ["src/repo_qa/retrieval/fusion.py", "src/repo_qa/retrieval/search.py"], "expected_substrings": ["rrf"]}
+{"question": "How is user input sanitized before running an FTS5 MATCH query?", "expected_paths": ["src/repo_qa/retrieval/keyword.py"], "expected_substrings": ["build_match_query"]}
+{"question": "How does the context pack stay within the token budget?", "expected_paths": ["src/repo_qa/retrieval/context.py"], "expected_substrings": ["token_budget"]}
+{"question": "How are overlapping search hits merged before prompting?", "expected_paths": ["src/repo_qa/retrieval/context.py"], "expected_substrings": ["merge_hits"]}
+{"question": "How are path:start-end citations parsed from a model answer?", "expected_paths": ["src/repo_qa/answering/citations.py"], "expected_substrings": ["CITATION_RE"]}
+{"question": "When is a citation marked as ungrounded instead of verified?", "expected_paths": ["src/repo_qa/answering/citations.py"]}
+{"question": "When does repo-qa reply that the answer was not found in the repo?", "expected_paths": ["src/repo_qa/answering/qa.py"], "expected_substrings": ["retrieval_confidence"]}
+{"question": "What system prompt is sent to the language model?", "expected_paths": ["src/repo_qa/answering/prompts.py"], "expected_substrings": ["SYSTEM_PROMPT"]}
+{"question": "How does the Anthropic provider handle a refusal stop reason?", "expected_paths": ["src/repo_qa/answering/providers/anthropic.py"], "expected_substrings": ["refusal"]}
+{"question": "How does the mock embedder produce deterministic vectors?", "expected_paths": ["src/repo_qa/embeddings/mock.py"], "expected_substrings": ["blake2b"]}
+{"question": "Where are the FTS5 triggers that keep the keyword index in sync defined?", "expected_paths": ["src/repo_qa/store/db.py"], "expected_substrings": ["chunks_ai"]}
+{"question": "How is conversation history used to retrieve context for follow-up questions?", "expected_paths": ["src/repo_qa/answering/memory.py"], "expected_substrings": ["retrieval_query"]}
+{"question": "How are settings read from REPO_QA environment variables?", "expected_paths": ["src/repo_qa/config.py"], "expected_substrings": ["from_env"]}
+{"question": "How are stored embedding vectors loaded for similarity search?", "expected_paths": ["src/repo_qa/store/repository.py", "src/repo_qa/retrieval/vector.py"], "expected_substrings": ["load_vectors"]}
+{"question": "How does the CLI decide which indexed repository to use?", "expected_paths": ["src/repo_qa/runtime.py"], "expected_substrings": ["resolve_repo"]}

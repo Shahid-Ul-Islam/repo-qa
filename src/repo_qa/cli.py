@@ -192,6 +192,82 @@ def ask(
         raise typer.Exit(code=2)
 
 
+@app.command("eval")
+def eval_cmd(
+    file: Annotated[Path, typer.Argument(help="JSONL eval set.", exists=True, dir_okay=False)],
+    repo: RepoOpt = None,
+    k: Annotated[int, typer.Option("--k", "-k", min=1, help="Cut-off for hit-rate/MRR.")] = 5,
+    answers: Annotated[
+        bool | None,
+        typer.Option(
+            "--answers/--no-answers",
+            help="Also answer each question to score citation precision "
+            "(default: only with a real LLM provider).",
+        ),
+    ] = None,
+    min_hit_rate: Annotated[
+        float | None, typer.Option(help="Exit 1 if hit-rate@k is below this.")
+    ] = None,
+    include: IncludeOpt = None,
+    exclude: ExcludeOpt = None,
+    db: DbOpt = None,
+    embedder: EmbedderOpt = None,
+    llm: LLMOpt = None,
+    as_json: JsonOpt = False,
+) -> None:
+    """Evaluate retrieval (hit-rate@k, MRR) and, optionally, citation precision."""
+    from repo_qa.evaluation.runner import EvalFileError, load_cases, run_eval
+
+    rt = _runtime(db_path=db, embedder=embedder, llm=llm)
+    try:
+        cases = load_cases(file)
+        record = rt.resolve_repo(repo)
+        with_answers = answers if answers is not None else rt.settings.llm != "mock"
+        engine = rt.engine() if with_answers else None
+        with console.status("Evaluating…") as status:
+            report = run_eval(
+                cases,
+                record,
+                rt.searcher,
+                k=k,
+                engine=engine,
+                include=include or [],
+                exclude=exclude or [],
+                progress=lambda n, total: status.update(f"Evaluating {n}/{total}…"),
+            )
+    except (EvalFileError, RepoNotFoundError, IndexMismatchError, ProviderError) as exc:
+        raise _fail(str(exc)) from exc
+    finally:
+        rt.close()
+
+    if as_json:
+        typer.echo(report.model_dump_json(indent=2))
+    else:
+        table = Table(title=f"{file.name} on {record.name} (k={k})")
+        for col in ("#", "question", "rank", "substr", "cit. prec."):
+            table.add_column(col)
+        for n, r in enumerate(report.cases, start=1):
+            table.add_row(
+                str(n),
+                r.question,
+                str(r.first_relevant_rank) if r.hit else "[red]miss[/red]",
+                "-" if r.substring_hit is None else ("yes" if r.substring_hit else "no"),
+                "-" if r.citation_precision is None else f"{r.citation_precision:.2f}",
+            )
+        console.print(table)
+        console.print(
+            f"hit-rate@{k}: [bold]{report.hit_rate:.3f}[/bold]   MRR@{k}: "
+            f"[bold]{report.mrr:.3f}[/bold]"
+        )
+        if report.substring_hit_rate is not None:
+            console.print(f"substring hit-rate@{k}: {report.substring_hit_rate:.3f}")
+        if report.citation_precision is not None:
+            console.print(f"citation precision: {report.citation_precision:.3f}")
+    if min_hit_rate is not None and report.hit_rate < min_hit_rate:
+        console.print(f"[red]hit-rate {report.hit_rate:.3f} below {min_hit_rate}[/red]")
+        raise typer.Exit(code=1)
+
+
 @app.command()
 def status(repo: RepoOpt = None, db: DbOpt = None, as_json: JsonOpt = False) -> None:
     """Show indexed repositories and their index statistics."""
