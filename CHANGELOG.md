@@ -9,3 +9,5 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - Project scaffold: pyproject (hatchling, pinned dependencies), ruff config, MIT license,
   `.gitignore`, `.env.example`, README stub.
+- GitHub Actions CI (Ubuntu + Windows): ruff check, ruff format, pytest.
+- `.gitattributes` normalising line endings to LF so hashes and line numbers match across OSes.
