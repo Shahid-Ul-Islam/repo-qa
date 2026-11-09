@@ -158,3 +158,14 @@ def test_openai_requires_key(monkeypatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     with pytest.raises(ProviderError, match="OPENAI_API_KEY"):
         OpenAIProvider().complete(build_request("q", PACK))
+
+
+@pytest.mark.parametrize("module", ["anthropic", "openai"])
+def test_missing_sdk_gives_install_hint(monkeypatch, module) -> None:
+    import sys
+
+    monkeypatch.setitem(sys.modules, module, None)  # simulate the extra not being installed
+    monkeypatch.setenv("OPENAI_API_KEY", "test")
+    provider = AnthropicProvider() if module == "anthropic" else OpenAIProvider()
+    with pytest.raises(ProviderError, match=rf"repo-qa\[{module}\]"):
+        provider.complete(build_request("q", PACK))

@@ -40,10 +40,11 @@ class AnthropicProvider:
         return self._client
 
     def complete(self, request: LLMRequest) -> str:
+        client = self._get_client()  # raises ProviderError with an install hint if missing
         import anthropic
 
         try:
-            response = self._get_client().beta.messages.create(
+            response = client.beta.messages.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
                 system=request.system,

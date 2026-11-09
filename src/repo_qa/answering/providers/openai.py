@@ -33,10 +33,11 @@ class OpenAIProvider:
         return self._client
 
     def complete(self, request: LLMRequest) -> str:
+        client = self._get_client()  # raises ProviderError with an install hint if missing
         import openai
 
         try:
-            response = self._get_client().responses.create(
+            response = client.responses.create(
                 model=self.model,
                 instructions=request.system,
                 input=[{"role": m.role, "content": m.content} for m in request.messages],
