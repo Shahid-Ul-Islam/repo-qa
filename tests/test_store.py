@@ -9,13 +9,6 @@ from repo_qa.store.repository import Store
 from repo_qa.text import identifier_terms, split_identifier, tokenize
 
 
-@pytest.fixture
-def store(tmp_path: Path) -> Store:
-    s = Store.open(tmp_path / "idx.db")
-    yield s
-    s.close()
-
-
 def _chunk(start: int, end: int, text: str, symbol: str | None = None) -> CodeChunk:
     return CodeChunk(
         language="python",

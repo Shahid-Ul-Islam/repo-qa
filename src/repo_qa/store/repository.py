@@ -197,18 +197,20 @@ class Store:
         )
         return {r[0] for r in rows}
 
-    def chunk_texts_by_hash(self, hashes: Iterable[str]) -> dict[str, str]:
-        out: dict[str, str] = {}
+    def chunks_by_hash(self, hashes: Iterable[str]) -> dict[str, StoredChunk]:
+        """One representative chunk per content hash (identical hash = identical input)."""
+        out: dict[str, StoredChunk] = {}
         hs = list(hashes)
         for i in range(0, len(hs), 500):
             batch = hs[i : i + 500]
             marks = ",".join("?" * len(batch))
             for row in self.conn.execute(
-                f"SELECT content_hash, text FROM chunks "
-                f"WHERE content_hash IN ({marks}) GROUP BY content_hash",
+                f"SELECT {_CHUNK_COLS} FROM chunks WHERE id IN ("
+                f"SELECT min(id) FROM chunks WHERE content_hash IN ({marks}) "
+                "GROUP BY content_hash)",
                 batch,
             ):
-                out[row["content_hash"]] = row["text"]
+                out[row["content_hash"]] = _row_to_chunk(row)
         return out
 
     # ------------------------------------------------------------- embeddings
