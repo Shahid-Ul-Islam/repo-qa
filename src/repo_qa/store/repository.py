@@ -191,6 +191,10 @@ class Store:
         ).fetchall()
         return [_row_to_chunk(r) for r in rows]
 
+    def chunk_paths(self, repo_id: int) -> dict[int, str]:
+        rows = self.conn.execute("SELECT id, path FROM chunks WHERE repo_id = ?", (repo_id,))
+        return {r[0]: r[1] for r in rows}
+
     def chunk_hashes(self, repo_id: int) -> set[str]:
         rows = self.conn.execute(
             "SELECT DISTINCT content_hash FROM chunks WHERE repo_id = ?", (repo_id,)
